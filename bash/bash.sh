@@ -2,7 +2,7 @@
 
 # add user bob 
 sudo useradd bob 
-
+  
 # remove user bob 
 sudo userdel bob 
 

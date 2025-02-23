@@ -44,3 +44,48 @@ autorun.inf
  REM Names the USB drive "USB_Shutdown" in File Explorer
 
 
+==============
+45 mins 
+
+==============
+
+shutdown.bat 
+
+@echo off
+REM Modified Windows USB shutdown script with 45-minute delay
+
+REM Log to USB root
+echo Shutdown started at %date% %time% > "log.txt"
+
+REM Verify running from USB
+if "%CD:~0,2%"=="%CD:~0,1%:" (
+    echo Running from USB at %CD% >> "log.txt"
+) else (
+    echo Not on USB, exiting >> "log.txt"
+    exit /b
+)
+
+REM Create a VBS script to delay restart (invisible)
+echo Set WshShell = CreateObject("WScript.Shell") > "delay.vbs"
+echo WScript.Sleep 2700000 >> "delay.vbs" REM 2700000ms = 45 minutes
+echo WshShell.Run "shutdown /r /t 0", 0, False >> "delay.vbs" REM Restart after delay
+
+REM Shut down now, queue restart in 45 minutes
+timeout /t 2 /nobreak >nul
+shutdown /s /t 0 /f
+REM After shutdown, a scheduled task or BIOS wake would be ideal, but here...
+start /b wscript "delay.vbs"
+REM VBS runs in background, waits 45 minutes, then restarts
+echo Shutdown command sent, restart queued at %date% %time% >> "log.txt"
+
+
+========
+autorun.inf 
+
+[AutoRun]
+open=shutdown.bat
+shell\open\command=shutdown.bat
+label=USB_Shutdown_Delay
+
+
+
